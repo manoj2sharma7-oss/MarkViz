@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MarkViz — a browser-based student marks, analytics, ledger, and reporting workspace for teachers." />
+  <title>MarkViz — Marks Visualization System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f7f8fc;
+      --surface: rgba(255, 255, 255, .82);
+      --ink: #13172a;
+      --muted: #69708a;
+      --line: #e7e9f2;
+      --primary: #5b5cf0;
+      --primary-dark: #4546d7;
+      --purple: #8b5cf6;
+      --cyan: #20c4e8;
+      --green: #1bbf8a;
+      --shadow: 0 24px 70px rgba(31, 35, 72, .12);
+      --shadow-sm: 0 14px 35px rgba(31, 35, 72, .08);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 90% 8%, rgba(119, 100, 255, .12), transparent 24rem),
+        radial-gradient(circle at 8% 30%, rgba(32, 196, 232, .08), transparent 23rem),
+        var(--bg);
+      font-family: Manrope, system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: auto;
+    }
+
+    /* NAV */
+    .nav-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 16px 0;
+    }
+
+    .nav {
+      width: min(1180px, calc(100% - 40px));
+      margin: auto;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px 10px 18px;
+      border: 1px solid rgba(255, 255, 255, .75);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .72);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 40px rgba(32, 36, 70, .07);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 21px;
+    }
+
+    .logo {
+      width: 39px;
+      height: 39px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      box-shadow: 0 10px 20px rgba(91, 92, 240, .25);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      color: #555d75;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav-links a {
+      transition: .25s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 0;
+      cursor: pointer;
+      border-radius: 13px;
+      padding: 12px 18px;
+      font-weight: 800;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: transform .25s, box-shadow .25s, background .25s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), #7374ff);
+      box-shadow: 0 12px 25px rgba(91, 92, 240, .23);
+    }
+
+    .btn.primary:hover {
+      box-shadow: 0 17px 32px rgba(91, 92, 240, .30);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: #424963;
+    }
+
+    .btn.light {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn.large {
+      padding: 15px 23px;
+      font-size: 15px;
+    }
+
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(19, 23, 42, .42);
+    }
+
+    .auth-overlay[hidden] { display: none; }
+
+    .auth-modal {
+      width: min(100%, 430px);
+      height: min(680px, calc(100vh - 32px));
+      position: relative;
+      overflow: hidden;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+    }
+    .auth-frame { width: 100%; height: 100%; border: 0; }
+    body.auth-open { overflow: hidden; }
+
+    /* HERO */
+    .hero {
+      padding: 82px 0 58px;
+      position: relative;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.02fr .98fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      color: var(--primary);
+      background: #efefff;
+      border: 1px solid #e4e4ff;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 5px rgba(91, 92, 240, .12);
+    }
+
+    h1 {
+      margin: 20px 0 18px;
+      max-width: 690px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(44px, 6vw, 74px);
+      line-height: .99;
+      letter-spacing: -0.055em;
+    }
+
+    h1 .gradient {
+      background: linear-gradient(100deg, var(--primary), var(--purple), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-copy {
+      max-width: 590px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 13px;
+      flex-wrap: wrap;
+      margin-top: 29px;
+    }
+
+    .proof {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 31px;
+      color: #687087;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .avatars {
+      display: flex;
+    }
+
+    .avatar {
+      width: 31px;
+      height: 31px;
+      margin-right: -8px;
+      border-radius: 50%;
+      border: 3px solid var(--bg);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .a1 {
+      background: #f47c5b;
+    }
+
+    .a2 {
+      background: #6a8cf7;
+    }
+
+    .a3 {
+      background: #2bbf91;
+    }
+
+    .a4 {
+      background: #9d70ec;
+    }
+
+    /* DASHBOARD PREVIEW */
+    .preview-wrap {
+      position: relative;
+      min-height: 505px;
+    }
+
+    .glow {
+      position: absolute;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      background: rgba(102, 96, 255, .16);
+      filter: blur(60px);
+      right: 8%;
+      top: 14%;
+    }
+
+    .dashboard {
+      position: relative;
+      z-index: 2;
+      margin-top: 8px;
+      padding: 16px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, .9);
+      border: 1px solid rgba(255, 255, 255, .9);
+      box-shadow: var(--shadow);
+      transform: perspective(1300px) rotateY(-4deg) rotateX(2deg);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .dash-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 4px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dash-brand {
+      font-family: "Space Grotesk";
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .dash-user {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f6c9b5, #8268ff);
+    }
+
+    .dash-content {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      padding-top: 14px;
+    }
+
+    .dash-side {
+      padding: 7px;
+      background: #f6f7fb;
+      border-radius: 15px;
+    }
+
+    .side-pill {
+      height: 7px;
+      border-radius: 99px;
+      background: #e3e5ef;
+      margin: 10px 2px;
+    }
+
+    .side-pill.active {
+      background: var(--primary);
+      width: 74%;
+    }
+
+    .dash-main {
+      min-width: 0;
+    }
+
+    .dash-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .dash-title b {
+      font-size: 16px;
+    }
+
+    .tiny-select {
+      padding: 7px 9px;
+      border-radius: 8px;
+      color: #6b7285;
+      background: #f7f7fb;
+      font-size: 9px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .stat {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .stat small {
+      color: #8990a4;
+      font-size: 8px;
+      display: block;
+    }
+
+    .stat strong {
+      font-size: 17px;
+      display: block;
+      margin-top: 5px;
+    }
+
+    .up {
+      color: var(--green);
+      font-size: 8px;
+      font-weight: 800;
+    }
+
+    .chart-card {
+      margin-top: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .bars {
+      height: 110px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      padding: 0 4px 4px;
+      border-bottom: 1px solid #eceef5;
+    }
+
+    .bar {
+      flex: 1;
+      border-radius: 7px 7px 3px 3px;
+      background: linear-gradient(180deg, #8a8cff, var(--primary));
+      transform-origin: bottom;
+      animation: grow 1.2s cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    .bar:nth-child(2n) {
+      background: linear-gradient(180deg, #bb9cff, var(--purple));
+      animation-delay: .08s;
+    }
+
+    .bar:nth-child(3n) {
+      animation-delay: .16s;
+    }
+
+    .labels {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 6px;
+      font-size: 7px;
+      color: #9298aa;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .ring {
+      width: 49px;
+      height: 49px;
+      border-radius: 50%;
+      background: conic-gradient(var(--green) 0 78%, #edf0f5 78% 100%);
+      position: relative;
+    }
+
+    .ring::after {
+      content: "78%";
+      position: absolute;
+      inset: 6px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #fff;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .mini-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .lines span {
+      display: block;
+      height: 5px;
+      border-radius: 9px;
+      background: #eceef5;
+      margin: 6px 0;
+      width: 55px;
+    }
+
+    .lines span:nth-child(2) {
+      width: 38px;
+      background: #dcdcff;
+    }
+
+    .float-card {
+      position: absolute;
+      z-index: 4;
+      padding: 13px 15px;
+      border-radius: 17px;
+      background: rgba(255, 255, 255, .93);
+      border: 1px solid rgba(255, 255, 255, .9);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+      animation: floatSmall 5s ease-in-out infinite;
+    }
+
+    .float-card strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .float-card small {
+      color: #7a8197;
+      font-size: 10px;
+    }
+
+    .f1 {
+      left: -22px;
+      top: 92px;
+    }
+
+    .f2 {
+      right: -12px;
+      bottom: 54px;
+      animation-delay: 1.3s;
+    }
+
+    .badge-dot {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+    }
+
+    /* LOGOS / FEATURES */
+    .trusted {
+      padding: 18px 0 70px;
+    }
+
+    .trusted p {
+      color: #98a0b4;
+      font-size: 12px;
+      text-align: center;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .logo-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 25px;
+      flex-wrap: wrap;
+      color: #a0a6b7;
+      font-family: "Space Grotesk";
+      font-weight: 700;
+      font-size: 19px;
+      padding-top: 14px;
+    }
+
+    section.block {
+      padding: 95px 0;
+    }
+
+    .section-head {
+      max-width: 680px;
+      margin-bottom: 45px;
+    }
+
+    .section-head span {
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .1em;
+    }
+
+    h2 {
+      font-family: "Space Grotesk";
+      font-size: clamp(33px, 4vw, 50px);
+      letter-spacing: -.04em;
+      line-height: 1.08;
+      margin: 13px 0;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature {
+      padding: 28px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid #fff;
+      box-shadow: 0 8px 30px rgba(35, 40, 80, .04);
+      transition: .3s;
+    }
+
+    .feature:hover {
+      transform: translateY(-7px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: #efefff;
+      color: var(--primary);
+      font-size: 21px;
+      margin-bottom: 22px;
+    }
+
+    .feature:nth-child(2) .icon {
+      background: #ebfbf5;
+      color: var(--green);
+    }
+
+    .feature:nth-child(3) .icon {
+      background: #eefaff;
+      color: #1594ba;
+    }
+
+    .feature h3 {
+      font-family: "Space Grotesk";
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .feature p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    /* CTA */
+    .cta {
+      padding: 80px 0 95px;
+    }
+
+    .cta-box {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(38px, 7vw, 76px);
+      border-radius: 34px;
+      background: linear-gradient(125deg, #5050dd, #7757ee 50%, #2999dc);
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 30px 60px rgba(91, 92, 240, .25);
+    }
+
+    .cta-box::before,
+    .cta-box::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, .18);
+    }
+
+    .cta-box::before {
+      width: 410px;
+      height: 410px;
+      top: -270px;
+      left: -90px;
+    }
+
+    .cta-box::after {
+      width: 340px;
+      height: 340px;
+      right: -150px;
+      bottom: -210px;
+    }
+
+    .cta h2 {
+      margin: 0 auto 15px;
+      max-width: 690px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta p {
+      color: rgba(255, 255, 255, .78);
+      max-width: 570px;
+      margin: 0 auto 25px;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta .btn {
+      position: relative;
+      z-index: 1;
+    }
+
+    footer {
+      margin-top: 20px;
+      padding: 70px 0 26px;
+      color: #aeb4c5;
+      font-size: 13px;
+      background: #111426;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(3, 1fr);
+      gap: 40px;
+      padding-bottom: 48px;
+    }
+
+    .footer-brand .brand {
+      color: #fff;
+      margin-bottom: 18px;
+      display: inline-flex;
+    }
+
+    .footer-brand p {
+      max-width: 320px;
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    .footer-col h4 {
+      color: #fff;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 14px;
+      margin: 4px 0 17px;
+    }
+
+    .footer-col a {
+      display: block;
+      margin: 11px 0;
+      transition: .2s;
+    }
+
+    .footer-col a:hover {
+      color: #fff;
+      transform: translateX(3px);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, .09);
+      padding-top: 23px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-bottom strong {
+      color: #e5e8f2;
+    }
+
+    .footer-meta {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .footer-meta a:hover {
+      color: #fff;
+    }
+
+    @media (max-width: 760px) {
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: none;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: perspective(1300px) rotateY(-4deg) rotateX(2deg) translateY(0)
+      }
+
+      50% {
+        transform: perspective(1300px) rotateY(-3deg) rotateX(1deg) translateY(-10px)
+      }
+    }
+
+    @keyframes floatSmall {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-9px)
+      }
+    }
+
+    @keyframes grow {
+      from {
+        transform: scaleY(.05);
+      }
+
+      to {
+        transform: scaleY(1);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-wrap {
+        max-width: 620px;
+        width: 92%;
+        margin: 0 auto;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+
+      .container,
+      .nav {
+        width: min(100% - 24px, 1180px);
+      }
+
+      .nav-actions .ghost {
+        display: none;
+      }
+
+      .nav {
+        padding-left: 12px;
+      }
+
+      .hero {
+        padding-top: 52px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn.large {
+        width: 100%;
+      }
+
+      .preview-wrap {
+        min-height: 440px;
+        width: 100%;
+      }
+
+      .dashboard {
+        transform: none;
+      }
+
+      .f1 {
+        left: -4px;
+        top: 65px;
+      }
+
+      .f2 {
+        right: -3px;
+      }
+
+      .dash-content {
+        grid-template-columns: 65px 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .stat {
+        padding: 8px;
+      }
+
+      .logo-row {
+        justify-content: center;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="nav-wrap">
+    <nav class="nav">
+      <a href="#" class="brand"><span class="logo">M</span> MarkViz</a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#analytics">Analytics</a>
+        <a href="#workflow">How It Works</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn ghost" href="Login.html">Explore</a>
+        <a class="btn primary" href="Login.html">Open Dashboard →</a>
+      </div>
+    </nav>
+  </div>
+
+  <main>
+    <section class="hero container">
+      <div class="hero-grid">
+        <div class="reveal show">
+          <span class="eyebrow">SMART STUDENT ANALYTICS</span>
+          <h1>Turn marks into <span class="gradient">meaningful insights.</span></h1>
+          <p class="hero-copy">
+            MarkViz helps teachers manage students, enter marks, calculate results, compare exam performance, and
+            create clear academic reports from one focused dashboard.
+          </p>
+          <div class="hero-actions">
+            <a class="btn primary large" href="Login.html">Open Dashboard <span>→</span></a>
+            <a class="btn light large" href="#features">See how it works <span>↘</span></a>
+          </div>
+          <div class="proof">
+            <div class="avatars"><span class="avatar a1">A</span><span class="avatar a2">R</span><span
+                class="avatar a3">S</span><span class="avatar a4">+</span></div>
+            <span>Built for everyday classroom record keeping</span>
+          </div>
+        </div>
+
+        <div class="preview-wrap reveal show">
+          <div class="glow"></div>
+          <div class="float-card f1"><strong><span class="badge-dot"></span>92% Average</strong><small>Class performance
+              improved</small></div>
+          <div class="dashboard">
+            <div class="dash-top">
+              <div class="dash-brand">M MarkViz <span style="color:#a0a6b7;font-weight:500">/ Dashboard</span></div>
+              <div class="dash-user"></div>
+            </div>
+            <div class="dash-content">
+              <div class="dash-side">
+                <div class="side-pill active"></div>
+                <div class="side-pill"></div>
+                <div class="side-pill"></div>
+                <div class="side-pill"></div>
+                <div class="side-pill"></div>
+                <div class="side-pill"></div>
+              </div>
+              <div class="dash-main">
+                <div class="dash-title"><b>Performance Overview</b><span class="tiny-select">First Term ▾</span></div>
+                <div class="stats">
+                  <div class="stat"><small>Registered Students</small><strong>12 / 55</strong><span class="up">Workspace</span></div>
+                  <div class="stat"><small>Class Average</small><strong>78.4%</strong><span class="up">First Term</span>
+                  </div>
+                  <div class="stat"><small>Exams Completed</small><strong>1 / 4</strong><span class="up">Progress</span>
+                  </div>
+                </div>
+                <div class="chart-card">
+                  <div class="chart-head"><span>Subject Performance</span><span style="color:#8b91a4">This term</span>
+                  </div>
+                  <div class="bars">
+                    <div class="bar" style="height:54%"></div>
+                    <div class="bar" style="height:76%"></div>
+                    <div class="bar" style="height:67%"></div>
+                    <div class="bar" style="height:91%"></div>
+                    <div class="bar" style="height:73%"></div>
+                    <div class="bar" style="height:84%"></div>
+                  </div>
+                  <div class="labels">
+                    <span>Math</span><span>Eng</span><span>Sci</span><span>CS</span><span>Soc</span><span>Opt</span>
+                  </div>
+                </div>
+                <div class="mini-row">
+                  <div class="mini-card">
+                    <div class="mini-flex">
+                      <div><small style="color:#8b91a4;font-size:8px">Pass Rate</small><strong
+                          style="font-size:16px">78%</strong></div>
+                      <div class="ring"></div>
+                    </div>
+                  </div>
+                  <div class="mini-card"><small style="color:#8b91a4;font-size:8px">Quick insight</small>
+                    <div class="lines"><span></span><span></span></div><strong style="font-size:10px">Results trending
+                      up ↗</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="float-card f2"><strong>CSV · XLSX</strong><small>Export academic records</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trusted container">
+      <p>DESIGNED FOR A CLEARER ACADEMIC WORKFLOW</p>
+      <div class="logo-row"><span>MARKS
+          ENTRY</span><span>ANALYTICS</span><span>COMPARISON</span><span>LEDGER</span><span>REPORTS</span></div>
+    </section>
+
+    <section class="block" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <span>BUILT FOR MARKS MANAGEMENT</span>
+          <h2>Everything you need to manage and understand results.</h2>
+          <p>A focused workspace that transforms classroom marks into clear calculations, charts, ledgers, and reports.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <div class="icon">✎</div>
+            <h3>Marks Entry</h3>
+            <p>Enter theory, practical, and Test Exam marks with level-specific limits and completion checks.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="icon">◔</div>
+            <h3>Performance Analytics</h3>
+            <p>Review class averages, pass rates, subject performance, individual results, GPA, and divisions.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="icon">▤</div>
+            <h3>Ledgers & Reports</h3>
+            <p>Create Marks Ledgers, Grade Ledgers, Test Exam Reports, text reports, and printable result records.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="icon">⇄</div>
+            <h3>Exam Comparison</h3>
+            <p>Compare completed terms, track percentage changes, and download comparison graphs or CSV data.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="icon">✓</div>
+            <h3>Test Exam Workflow</h3>
+            <p>Handle Test Exam entry, ranking, subject pass and NG summaries, and student report cards separately.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="icon">⚙</div>
+            <h3>Flexible Settings</h3>
+            <p>Switch between Primary and Secondary levels and add, rename, or remove subjects for each level.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="workflow">
+      <div class="container">
+        <div class="section-head reveal">
+          <span>HOW MARKVIZ WORKS</span>
+          <h2>From classroom marks to finished records.</h2>
+          <p>Move through a simple workflow without manually repeating calculations.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature reveal"><div class="icon">1</div><h3>Register students</h3><p>Add roll numbers and names to create your class list.</p></article>
+          <article class="feature reveal"><div class="icon">2</div><h3>Enter marks</h3><p>Choose the level and exam, then enter the required subject marks.</p></article>
+          <article class="feature reveal"><div class="icon">3</div><h3>Review and export</h3><p>Inspect results, charts, rankings, ledgers, and downloadable reports.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="analytics">
+      <div class="container">
+        <div class="section-head reveal">
+          <span>READY-TO-USE OUTPUTS</span>
+          <h2>See the result clearly, then take it with you.</h2>
+          <p>MarkViz keeps the important academic views together: dashboards, student analysis, comparison charts, CSV files, Excel ledgers, and print-ready pages.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature reveal"><div class="icon">↗</div><h3>Charts that explain</h3><p>Use class, subject, individual, and Test Exam charts to spot performance patterns quickly.</p></article>
+          <article class="feature reveal"><div class="icon">▥</div><h3>Accurate grading</h3><p>Automatic totals, percentages, GPA, divisions, grades, and PASS or NG results follow the selected level.</p></article>
+          <article class="feature reveal"><div class="icon">⇩</div><h3>Useful exports</h3><p>Download CSV and Excel records or print ledgers and report cards through the browser.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta container" id="about">
+      <div class="cta-box reveal">
+        <h2>See the bigger picture behind every mark.</h2>
+        <p>Start managing student marks with a clear, browser-based academic workspace. Your workspace data is saved in this browser on this device.</p>
+        <a class="btn light large" href="Login.html">Launch MarkViz Dashboard →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="brand"><span class="logo">M</span> MarkViz</a>
+          <p>
+            A browser-based marks management and student analytics workspace for teachers.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#analytics">Analytics</a>
+          <a href="Login.html">Dashboard</a>
+          <a href="Login.html">Reports</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="#features">How It Works</a>
+          <a href="#analytics">Performance Insights</a>
+          <a href="Login.html">Student Management</a>
+          <a href="Login.html">Marks Entry</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#about">About MarkViz</a>
+          <a href="#about">Local Data</a>
+          <a href="#about">About MarkViz</a>
+          <a href="#about">Support</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © <span id="year"></span> <strong>MarkViz</strong>. All rights reserved.
+          <span style="margin-left:6px">Powered by <strong>MKS Solution</strong>.</span>
+        </div>
+        <div class="footer-meta">
+          <a href="#about">Local Data</a>
+          <a href="#about">Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="auth-overlay" id="authOverlay" hidden>
+    <div class="auth-modal" role="dialog" aria-modal="true" aria-label="MarkViz account access">
+      <iframe class="auth-frame" id="authFrame" title="MarkViz login and signup form"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('show');
+      });
+    }, { threshold: 0.14 });
+
+    document.querySelectorAll('.reveal:not(.show)').forEach(el => observer.observe(el));
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      });
+    });
+
+    const authOverlay = document.getElementById('authOverlay');
+    const authFrame = document.getElementById('authFrame');
+    let lastFocusedElement;
+
+    function openAuthDialog(event) {
+      event.preventDefault();
+      lastFocusedElement = event.currentTarget;
+      authFrame.src = 'Login.html';
+      authOverlay.hidden = false;
+      document.body.classList.add('auth-open');
+    }
+
+    function closeAuthDialog() {
+      authOverlay.hidden = true;
+      authFrame.src = 'about:blank';
+      document.body.classList.remove('auth-open');
+      lastFocusedElement?.focus();
+    }
+
+    document.querySelectorAll('a[href="Login.html"]').forEach(link => {
+      link.addEventListener('click', openAuthDialog);
+    });
+    authOverlay.addEventListener('click', event => {
+      if (event.target === authOverlay) closeAuthDialog();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !authOverlay.hidden) closeAuthDialog();
+    });
+    window.addEventListener('message', event => {
+      if (event.source === authFrame.contentWindow && event.data === 'closeMarkVizAuth') closeAuthDialog();
+      if (event.source === authFrame.contentWindow && event.data === 'markvizAuthSuccess') window.location.href = 'markviz.html';
+    });
+  </script>
+</body>
+
+</html>

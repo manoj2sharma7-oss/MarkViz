@@ -1,0 +1,18 @@
+{
+  "name": "markviz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MarkViz teacher analytics workspace with PostgreSQL authentication",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node smoke-test.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.23.0"
+  }
+}
