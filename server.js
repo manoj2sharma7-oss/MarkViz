@@ -9,6 +9,8 @@ const databaseUrl = process.env.DATABASE_URL;
 const sessionDurationMs = 1000 * 60 * 60 * 24 * 7;
 const isProduction = process.env.NODE_ENV === "production";
 
+app.get("/", (request, response) => response.sendFile(path.join(__dirname, "markviz_landing_page.html")));
+
 if (!databaseUrl) {
   console.error("DATABASE_URL is required. Set it to your PostgreSQL connection string.");
   if (require.main === module) process.exitCode = 1;
