@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1220">
+  <title>MarkViz — Student Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-label="Show dashboard navigation" title="Show dashboard navigation" aria-expanded="false"><span aria-hidden="true">☰</span><span class="mobile-nav-label">Menu</span></button>
+  <aside class="sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Hide dashboard navigation" title="Hide dashboard navigation">‹</button>
+
+    <div class="brand">
+      <div class="logo"><span>M</span></div>
+      <div class="brand-copy"><b>MarkViz</b><small>Student Analytics</small></div>
+    </div>
+
+    <div class="nav-caption">WORKSPACE</div>
+    <nav id="nav">
+      <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
+      <button class="nav-item" data-page="students"><span class="nav-icon">♙</span><span>Students</span></button>
+      <button class="nav-item" data-page="marks"><span class="nav-icon">✎</span><span>Marks Entry</span></button>
+      <button class="nav-item" data-page="analysis"><span class="nav-icon">◔</span><span>Analysis</span></button>
+      <button class="nav-item" data-page="comparison"><span class="nav-icon">⇄</span><span>Comparison</span></button>
+      <button class="nav-item" data-page="ledger"><span class="nav-icon">▤</span><span>Ledger</span></button>
+      <button class="nav-item" data-page="gradeLedger"><span class="nav-icon">▥</span><span>Grade Ledger</span></button>
+      <button class="nav-item" data-page="reports"><span class="nav-icon">▧</span><span>Reports</span></button>
+      <div class="nav-dropdown">
+        <button class="nav-item nav-dropdown-toggle" type="button" aria-expanded="false" aria-controls="testExamMenu">
+          <span class="nav-label"><span class="nav-icon">✓</span><span>Test Exam</span></span>
+          <span class="dropdown-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="nav-dropdown-menu" id="testExamMenu" hidden>
+          <button class="nav-item nav-dropdown-option" type="button" data-page="testMarks"><span class="sub-dot"></span>Marks Entry</button>
+          <button class="nav-item nav-dropdown-option" type="button" data-page="testLedger"><span class="sub-dot"></span>Ledger</button>
+          <button class="nav-item nav-dropdown-option" type="button" data-page="testReport"><span class="sub-dot"></span>Report</button>
+          <button class="nav-item nav-dropdown-option" type="button" data-page="testSettings"><span class="sub-dot"></span>Settings</button>
+        </div>
+      </div>
+      <button class="nav-item" data-page="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="footer-status"><span class="status-dot"></span><span>Workspace active</span></div>
+      <div><%= user.fullName %> &middot; <%= user.schoolName %></div>
+      <div>Powered by <strong>MKS Solution</strong></div>
+      <small>© All rights reserved.</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="page-heading">
+        <span class="eyebrow"><span class="eyebrow-dot"></span>TEACHER WORKSPACE</span>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p>Manage marks, performance and reports from one place.</p>
+      </div>
+      <div class="top-actions">
+        <label class="exam-picker">
+          <span>EXAM</span>
+          <select id="examSelect" aria-label="Exam">
+            <option value="0">First Term</option>
+            <option value="1">Second Term</option>
+            <option value="2">Third Term</option>
+            <option value="3">Annual Exam</option>
+          </select>
+        </label>
+        <button class="btn danger" id="logoutBtn" hidden><span>↪</span> Logout</button>
+      </div>
+    </header>
+
+    <section id="content"></section>
+  </main>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

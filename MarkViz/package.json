@@ -1,0 +1,20 @@
+{
+  "name": "markviz",
+  "version": "2.0.0",
+  "private": true,
+  "description": "MarkViz teacher analytics workspace with PostgreSQL authentication (MVC structure, EJS views)",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node smoke-test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "pg": "^8.23.0"
+  }
+}
